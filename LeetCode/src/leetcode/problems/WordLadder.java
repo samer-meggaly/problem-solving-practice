@@ -11,8 +11,44 @@ import java.util.Queue;
 import java.util.Set;
 
 public class WordLadder {
-	// https://leetcode.com/problems/word-ladder-ii/
-	
+	/*
+	 * https://leetcode.com/problems/word-ladder/
+	 * https://leetcode.com/problems/word-ladder-ii/
+	 */
+
+	public int ladderLength(String beginWord, String endWord,
+			Set<String> wordList) {
+        if (beginWord.equals(endWord))
+            return 0;
+        Map<String, Integer> shortestPathToWord = new HashMap<String, Integer>();
+        for (String w: wordList)
+            shortestPathToWord.put(w, Integer.MAX_VALUE);
+        shortestPathToWord.put(beginWord, 1);
+        shortestPathToWord.put(endWord, Integer.MAX_VALUE);
+        boolean foundEndWord = false;
+        Queue<String> queue = new ArrayDeque<String>();
+        queue.offer(beginWord);
+        while(!queue.isEmpty() && !foundEndWord) {
+            char[] currWord = queue.poll().toCharArray();
+            int minStepsToCurrWord = shortestPathToWord.get(new String(currWord));
+            for (int i = 0; i < currWord.length && !foundEndWord; i++) {
+                char tempChar = currWord[i];
+                for (int c = 'a'; c <= 'z' && !foundEndWord; c++) {
+                    currWord[i] = (char) c;
+                    String nextString = new String(currWord);
+                    if (shortestPathToWord.containsKey(nextString) && (minStepsToCurrWord + 1) < shortestPathToWord.get(nextString)) {
+                        shortestPathToWord.put(nextString, minStepsToCurrWord + 1);
+                        queue.offer(nextString);
+                        foundEndWord = nextString.equals(endWord);
+                    }
+                }
+                currWord[i] = tempChar;
+            }
+        }
+        
+        return (foundEndWord)? shortestPathToWord.get(endWord) : 0;
+	}
+
 	public List<List<String>> findLadders(String beginWord, String endWord,
 			Set<String> wordList) {
 		List<List<String>> results = new ArrayList<List<String>>();
@@ -81,6 +117,8 @@ public class WordLadder {
 		String endWord = "cog";
 		String[] wordList = new String[] { "hot", "dit", "dot", "dog", "lot",
 				"log" };
+		System.out.println(new WordLadder().ladderLength(beginWord, endWord,
+				new HashSet<String>(Arrays.asList(wordList))));
 		List<List<String>> paths = new WordLadder().findLadders(beginWord,
 				endWord, new HashSet<String>(Arrays.asList(wordList)));
 		for (List<String> path : paths)
@@ -155,6 +193,8 @@ public class WordLadder {
 				"hob", "mow", "jot", "are", "pol", "arc", "lax", "aft", "alb",
 				"len", "air", "pug", "pox", "vow", "got", "meg", "zoe", "amp",
 				"ale", "bud", "gee", "pin", "dun", "pat", "ten", "mob" };
+		System.out.println(new WordLadder().ladderLength(beginWord, endWord,
+				new HashSet<String>(Arrays.asList(wordList))));
 		paths = new WordLadder().findLadders(beginWord, endWord,
 				new HashSet<String>(Arrays.asList(wordList)));
 		for (List<String> path : paths)
