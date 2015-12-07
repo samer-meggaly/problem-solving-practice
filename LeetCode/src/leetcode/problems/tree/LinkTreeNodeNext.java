@@ -1,139 +1,132 @@
 package leetcode.problems.tree;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.Stack;
 
 public class LinkTreeNodeNext {
-	public class Solution {
-		public void connect(TreeLinkNode root) {
-			solve3(root);
+
+	/*
+	 * https://leetcode.com/problems/populating-next-right-pointers-in-each-node/
+	 * https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/
+	 */
+
+	public void connectPerfectBT(TreeLinkNode root) {
+		// Passes on LeetCode for Perfect Binary Trees.
+		int counter = 1;
+		TreeLinkNode ptr = root;
+		TreeLinkNode firstInNextLevel = null;
+		while (ptr != null && ptr.left != null && ptr.right != null) {
+			if ((counter & (counter - 1)) == 0) {
+				firstInNextLevel = ptr.left;
+			}
+			counter++;
+
+			ptr.left.next = ptr.right;
+			if (ptr.next != null) {
+				ptr.right.next = ptr.next.left;
+				ptr = ptr.next;
+			} else {
+				ptr = firstInNextLevel;
+			}
 		}
+	}
 
-		public void solve3(TreeLinkNode root) {
-			Stack<TreeLinkNode> stack = new Stack<TreeLinkNode>();
-			stack.push(root);
-			while (!stack.isEmpty()) {
-				TreeLinkNode curr = stack.pop();
-				if (curr == null)
-					continue;
+	public void connectUsingTwoQueues(TreeLinkNode root) {
+		// Passes on LeetCode, but uses O(N) space.
+		if (root == null)
+			return;
+		Queue<TreeLinkNode> q0 = new ArrayDeque<TreeLinkNode>();
+		q0.add(root);
+		while (!q0.isEmpty()) {
+			Queue<TreeLinkNode> q1 = new ArrayDeque<TreeLinkNode>();
+			while (!q0.isEmpty()) {
+				TreeLinkNode n = q0.poll();
+				n.next = q0.peek();
+				if (n.left != null)
+					q1.offer(n.left);
+				if (n.right != null)
+					q1.offer(n.right);
+			}
+			q0 = q1;
+		}
+	}
 
-				if (curr.left != null) {
-					if (curr.right != null)
-						curr.left.next = curr.right;
+	public void connectNonPerfectBTWithNoSpace(TreeLinkNode root) {
+		// Passes on LeetCode for non-Perfect Binary Trees. Uses O(1) space.
+		// Time complexity is >= N2, I think O(N2 * LgN).
+		TreeLinkNode ptr = root;
+		TreeLinkNode firstInNextLevel = null;
+		while (ptr != null) {
+			if (firstInNextLevel == null) {
+				firstInNextLevel = (ptr.left != null) ? ptr.left : ptr.right;
+			}
+
+			TreeLinkNode nextInNextLevel = getLeftMostChildOfParent(ptr.next);
+			if (ptr.right != null) {
+				ptr.right.next = nextInNextLevel;
+				if (ptr.left != null)
+					ptr.left.next = ptr.right;
+			} else if (ptr.left != null) {
+				ptr.left.next = nextInNextLevel;
+			}
+
+			if (ptr.next != null) {
+				ptr = ptr.next;
+			} else {
+				ptr = firstInNextLevel;
+				firstInNextLevel = null;
+			}
+		}
+	}
+
+	private TreeLinkNode getLeftMostChildOfParent(TreeLinkNode parent) {
+		while (parent != null) {
+			if (parent.left != null)
+				return parent.left;
+			if (parent.right != null)
+				return parent.right;
+			parent = parent.next;
+		}
+		return null;
+	}
+
+	public void connect(TreeLinkNode root) {
+		// NOT my solution. Just implemented it to keep the optimal solution.
+		// O(1) Space and O(N) Time complexities.
+		TreeLinkNode ptr = root;
+		while (ptr != null) {
+
+			// process the current level's children nodes.
+			TreeLinkNode firstInNextLevel = null;
+
+			/*
+			 * The following pointer will always hold the "previous" to the
+			 * child node that is being processes. It is always null at the
+			 * beginning of processing of the level, which makes sense (The
+			 * leftmost child will have NO previous node).
+			 */
+			TreeLinkNode mostRightInNextLevel = null;
+			while (ptr != null) {
+				if (ptr.left != null) {
+					if (mostRightInNextLevel == null)
+						firstInNextLevel = ptr.left;
 					else
-						curr.left.next = getFirstNonNullRight(curr.next);
+						mostRightInNextLevel.next = ptr.left;
+					mostRightInNextLevel = ptr.left;
 				}
 
-				if (curr.right != null) {
-					curr.right.next = getFirstNonNullRight(curr.next);
+				if (ptr.right != null) {
+					if (mostRightInNextLevel == null)
+						firstInNextLevel = ptr.right;
+					else
+						mostRightInNextLevel.next = ptr.right;
+					mostRightInNextLevel = ptr.right;
 				}
 
-				stack.push(curr.left);
-				stack.push(curr.right);
+				ptr = ptr.next;
 			}
+
+			ptr = firstInNextLevel;
 		}
-
-		public void solve2(TreeLinkNode root) {
-			if (root == null)
-				return;
-
-			if (root.left != null) {
-				if (root.right != null)
-					root.left.next = root.right;
-				else
-					root.left.next = getFirstNonNullRight(root.next);
-			}
-
-			if (root.right != null) {
-				root.right.next = getFirstNonNullRight(root.next);
-			}
-
-			solve2(root.right);
-			solve2(root.left);
-		}
-
-		private TreeLinkNode getFirstNonNullRight(TreeLinkNode parent) {
-			TreeLinkNode firstNonNullRight = null;
-			while (parent != null && firstNonNullRight == null) {
-				if (parent.left != null)
-					firstNonNullRight = parent.left;
-				else if (parent.right != null)
-					firstNonNullRight = parent.right;
-				else
-					parent = parent.next;
-			}
-			return firstNonNullRight;
-		}
-
-		public void solve1(TreeLinkNode root) {
-			Queue<TreeLinkNode> q0 = new LinkedList<TreeLinkNode>();
-			Queue<TreeLinkNode> q1 = new LinkedList<TreeLinkNode>();
-			q0.add(root);
-			boolean done = false;
-			while (!done) {
-				if (!q0.isEmpty()) {
-					fillOther(q0, q1);
-				} else if (!q1.isEmpty()) {
-					fillOther(q1, q0);
-				} else {
-					done = true;
-				}
-			}
-		}
-
-		private void fillOther(Queue<TreeLinkNode> queue,
-				Queue<TreeLinkNode> other) {
-			while (!queue.isEmpty()) {
-				TreeLinkNode n = queue.poll();
-				if (n != null) {
-					n.next = queue.peek();
-					if (n.left != null)
-						other.offer(n.left);
-					if (n.right != null)
-						other.offer(n.right);
-				}
-			}
-		}
-	}
-
-	public static void main(String[] args) {
-		Solution solver = new LinkTreeNodeNext().new Solution();
-		case1(solver);
-		case2(solver);
-	}
-
-	private static void case1(Solution solver) {
-		TreeLinkNode node1 = new TreeLinkNode(1);
-		TreeLinkNode node2 = new TreeLinkNode(2);
-		TreeLinkNode node3 = new TreeLinkNode(3);
-		TreeLinkNode node4 = new TreeLinkNode(4);
-		TreeLinkNode node5 = new TreeLinkNode(5);
-		TreeLinkNode node6 = new TreeLinkNode(6);
-		TreeLinkNode node7 = new TreeLinkNode(7);
-		node1.left = node2;
-		node1.right = node3;
-		node2.left = node4;
-		node2.right = node5;
-		node3.left = node6;
-		node3.right = node7;
-		solver.connect(node1);
-		System.out.println();
-	}
-
-	private static void case2(Solution solver) {
-		TreeLinkNode node1 = new TreeLinkNode(1);
-		TreeLinkNode node2 = new TreeLinkNode(2);
-		TreeLinkNode node3 = new TreeLinkNode(3);
-		TreeLinkNode node4 = new TreeLinkNode(4);
-		TreeLinkNode node7 = new TreeLinkNode(7);
-		node1.left = node2;
-		node1.right = node3;
-		node2.left = node4;
-		// node2.right = node5;
-		// node3.left = node6;
-		node3.right = node7;
-		solver.connect(node1);
-		System.out.println();
 	}
 }
