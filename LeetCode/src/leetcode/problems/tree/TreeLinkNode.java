@@ -7,8 +7,8 @@ public class TreeLinkNode {
 	// / \ / \
 	// 4->5->6->7 -> NULL
 
-	int val;
-	TreeLinkNode left, right, next;
+	public int val;
+	public TreeLinkNode left, right, next;
 
 	public TreeLinkNode(int val) {
 		this.val = val;
