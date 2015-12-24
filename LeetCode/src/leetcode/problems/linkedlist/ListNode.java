@@ -46,6 +46,25 @@ public class ListNode {
 		return sortedListHead;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ListNode other = (ListNode) obj;
+		if (next == null) {
+			if (other.next != null)
+				return false;
+		} else if (!next.equals(other.next))
+			return false;
+		if (val != other.val)
+			return false;
+		return true;
+	}
+
 	public static void main(String[] args) {
 		System.out.println(deleteDuplicates(buildList(new int[] { 1, 2, 2, 2,
 				3, 4, 4, 5 })));
