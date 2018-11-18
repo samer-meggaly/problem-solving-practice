@@ -17,8 +17,19 @@ public class ListNode {
 			next.append(listToAppend);
 	}
 
+	@Override
 	public String toString() {
-		return val + ((next == null) ? "" : ", " + next);
+		StringBuilder sb = new StringBuilder();
+		sb.append("[ ");
+		ListNode ptr = this;
+		while (ptr != null) {
+			sb.append(ptr.val);
+			if (ptr.next != null)
+				sb.append(", ");
+			ptr = ptr.next;
+		}
+		sb.append(" ]");
+		return sb.toString();
 	}
 
 	public static ListNode buildList(int[] elems) {

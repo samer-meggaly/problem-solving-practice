@@ -22,6 +22,30 @@ public class LeetPrinter {
 		}
 	}
 
+	public static void assertArraysPrint(int[] expected, int[] actual,
+			String messagePrefix) {
+		if (!Arrays.equals(expected, actual)) {
+			System.err.println(messagePrefix + Arrays.toString(actual));
+			System.err.flush();
+		}
+	}
+
+	public static void assertArraysPrint(char[] expected, char[] actual,
+			String messagePrefix) {
+		if (!Arrays.equals(expected, actual)) {
+			System.err.println(messagePrefix + Arrays.toString(actual));
+			System.err.flush();
+		}
+	}
+
+	public static void assertArraysPrint(double[] expected, double[] actual,
+			String messagePrefix) {
+		if (!Arrays.equals(expected, actual)) {
+			System.err.println(messagePrefix + Arrays.toString(actual));
+			System.err.flush();
+		}
+	}
+
 	public static String str(int[] array) {
 		return Arrays.toString(array);
 	}
